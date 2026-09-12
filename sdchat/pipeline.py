@@ -70,13 +70,29 @@ def load_pipeline(model: str = DEFAULT_PRESET, device: str | None = None):
     pipe.set_progress_bar_config(disable=True)
 
     if device == "cpu":
-        # 15 GB of RAM is plenty, but slicing keeps peak usage flat and costs
-        # nothing measurable when the bottleneck is CPU matmul anyway.
-        pipe.enable_attention_slicing()
-        pipe.enable_vae_slicing()
+        # Slicing keeps peak memory flat and costs nothing measurable when the
+        # bottleneck is CPU matmul anyway. Both helpers have moved between
+        # diffusers releases, so treat either as optional.
+        _enable_slicing(pipe)
         torch.set_num_threads(os.cpu_count() or 4)
 
     return pipe
+
+
+def _enable_slicing(pipe) -> None:
+    """Turn on attention and VAE slicing, whichever spelling this diffusers has."""
+    for target, method in (
+        (pipe, "enable_attention_slicing"),
+        (getattr(pipe, "vae", None), "enable_slicing"),
+        (pipe, "enable_vae_slicing"),
+    ):
+        if target is None:
+            continue
+        fn = getattr(target, method, None)
+        if callable(fn):
+            fn()
+            if method != "enable_attention_slicing":
+                break
 
 
 def _slugify(prompt: str, limit: int = 48) -> str:

@@ -91,3 +91,18 @@ telling you so. Two ways around it:
 - Allow `huggingface.co` and `cdn-lfs.huggingface.co` in the network policy.
 - Download a checkpoint on another machine and pass the file directly:
   `generate.py "a prompt" --model /path/to/model.safetensors`
+
+## Offline smoke test
+
+`tests/test_smoke.py` builds a tiny pipeline with random weights, saves it,
+then drives it through the real `load_pipeline` and `generate` functions:
+
+```bash
+.venv/bin/python tests/test_smoke.py
+```
+
+It needs no network and finishes in seconds. The image it writes is noise,
+because the weights are random. What it checks is the plumbing: that a model
+directory loads, that preset defaults and the seed reach the scheduler, that
+the same seed reproduces an image and a different one does not, and that a
+correctly sized PNG lands on disk.
