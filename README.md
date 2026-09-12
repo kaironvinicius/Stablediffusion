@@ -123,3 +123,17 @@ because the weights are random. What it checks is the plumbing: that a model
 directory loads, that preset defaults and the seed reach the scheduler, that
 the same seed reproduces an image and a different one does not, and that a
 correctly sized PNG lands on disk.
+
+## Cloud session provisioning
+
+Cloud containers are reclaimed after a period of inactivity, so a new session
+starts with an empty workspace: no virtualenv, no weights. `.claude/hooks/
+session-start.sh` rebuilds both, and `.claude/settings.json` registers it as a
+`SessionStart` hook, so it travels with the repository rather than living in
+one person's environment settings.
+
+The hook exits immediately unless `CLAUDE_CODE_REMOTE` is `true`, leaving local
+checkouts to manage their own environment. Each step checks for its own result
+first, so a warm container passes through in a few seconds. Set
+`SDCHAT_SKIP_MODEL=1` to start a session without the weights when you only mean
+to read or edit code.
