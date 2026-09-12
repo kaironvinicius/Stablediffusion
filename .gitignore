@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+
+# Model weights and the Hugging Face cache: multi-GB, never committed.
+models/
+outputs/
