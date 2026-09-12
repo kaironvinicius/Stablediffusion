@@ -46,7 +46,8 @@ PRESETS: dict[str, Preset] = {
         supports_negative=False,
     ),
     "sd15": Preset(
-        repo_id="runwayml/stable-diffusion-v1-5",
+        # The original runwayml repo now redirects; this is the live mirror.
+        repo_id="stable-diffusion-v1-5/stable-diffusion-v1-5",
         steps=25,
         guidance=7.5,
         size=512,
