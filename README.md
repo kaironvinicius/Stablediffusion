@@ -43,7 +43,7 @@ generate.py PROMPT
   -n, --negative   what to avoid (turbo models ignore this, see below)
   -s, --steps      denoising steps
   -g, --guidance   classifier-free guidance scale
-  -a, --aspect     square, portrait, landscape, tall or wide
+  -a, --aspect     square, portrait, landscape, tall or wide (default: portrait)
       --size       pixels per side before the aspect is applied
       --width      exact width, overrides --aspect and --size
       --height     exact height, overrides --aspect and --size
@@ -81,7 +81,7 @@ extra time. At the default 768:
 | Aspect | Size |
 | --- | --- |
 | `square` | 768x768 |
-| `portrait` | 664x888 |
+| `portrait` | 664x888 (default) |
 | `landscape` | 888x664 |
 | `tall` | 624x944 |
 | `wide` | 944x624 |

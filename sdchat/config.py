@@ -109,7 +109,7 @@ ASPECTS: dict[str, tuple[int, int]] = {
     "wide": (3, 2),
 }
 
-DEFAULT_ASPECT = "square"
+DEFAULT_ASPECT = "portrait"
 
 
 def dimensions(size: int, aspect: str = DEFAULT_ASPECT) -> tuple[int, int]:
