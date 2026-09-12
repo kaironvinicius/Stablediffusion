@@ -32,7 +32,10 @@ PRESETS: dict[str, Preset] = {
         repo_id="stabilityai/sd-turbo",
         steps=2,
         guidance=0.0,
-        size=512,
+        # The model is trained at 512 and duplicates subjects above it, but the
+        # extra detail is worth the tradeoff here. Pass --size 512 for a clean
+        # composition, or 768 for a middle ground.
+        size=1024,
         supports_negative=False,
     ),
     "sdxl-turbo": Preset(
