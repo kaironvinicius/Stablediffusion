@@ -97,3 +97,37 @@ def preset_for(model: str) -> Preset:
     if "xl" in lowered:
         return PRESETS["sdxl"]
     return PRESETS["sd15"]
+
+
+# Aspect ratios as width:height. Diffusion models are trained on square images
+# and drift at extreme ratios, so these stay mild.
+ASPECTS: dict[str, tuple[int, int]] = {
+    "square": (1, 1),
+    "portrait": (3, 4),
+    "landscape": (4, 3),
+    "tall": (2, 3),
+    "wide": (3, 2),
+}
+
+DEFAULT_ASPECT = "square"
+
+
+def dimensions(size: int, aspect: str = DEFAULT_ASPECT) -> tuple[int, int]:
+    """Return (width, height) for an aspect, holding the pixel count at size^2.
+
+    Keeping the area fixed means changing orientation costs no extra time. Both
+    values are rounded to a multiple of 8, which the VAE requires.
+    """
+    try:
+        ratio_w, ratio_h = ASPECTS[aspect]
+    except KeyError:
+        known = ", ".join(ASPECTS)
+        raise SystemExit(f"unknown aspect {aspect!r}; choose one of: {known}") from None
+
+    width = size * (ratio_w / ratio_h) ** 0.5
+    height = size * (ratio_h / ratio_w) ** 0.5
+    return _round8(width), _round8(height)
+
+
+def _round8(value: float) -> int:
+    return max(8, round(value / 8) * 8)

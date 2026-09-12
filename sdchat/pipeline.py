@@ -33,7 +33,8 @@ class Result:
     seed: int
     steps: int
     guidance: float
-    size: int
+    width: int
+    height: int
     device: str
     seconds: float
 
@@ -108,7 +109,8 @@ def generate(
     negative: str | None = None,
     steps: int | None = None,
     guidance: float | None = None,
-    size: int | None = None,
+    width: int | None = None,
+    height: int | None = None,
     seed: int | None = None,
     outdir: Path | None = None,
 ) -> Result:
@@ -117,7 +119,8 @@ def generate(
 
     steps = steps if steps is not None else preset.steps
     guidance = guidance if guidance is not None else preset.guidance
-    size = size if size is not None else preset.size
+    width = width if width is not None else preset.size
+    height = height if height is not None else preset.size
     if seed is None:
         seed = int.from_bytes(os.urandom(4), "big")
 
@@ -128,8 +131,8 @@ def generate(
         prompt=prompt,
         num_inference_steps=steps,
         guidance_scale=guidance,
-        width=size,
-        height=size,
+        width=width,
+        height=height,
         generator=generator,
     )
     # Passing a negative prompt at guidance 0 is silently ignored by diffusers,
@@ -151,7 +154,8 @@ def generate(
         seed=seed,
         steps=steps,
         guidance=guidance,
-        size=size,
+        width=width,
+        height=height,
         device=device,
         seconds=elapsed,
     )

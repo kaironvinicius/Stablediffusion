@@ -24,7 +24,7 @@ import torch
 from diffusers import AutoencoderKL, DDIMScheduler, StableDiffusionPipeline, UNet2DConditionModel
 from transformers import CLIPTextConfig, CLIPTextModel, CLIPTokenizer
 
-from sdchat.config import PRESETS
+from sdchat.config import ASPECTS, PRESETS, dimensions
 from sdchat.pipeline import generate, load_pipeline
 
 LATENT_DIM = 32
@@ -135,7 +135,8 @@ def main() -> int:
         pipe,
         "a lighthouse in a storm",
         preset=PRESETS["sd-turbo"],
-        size=IMAGE_SIZE,
+        width=IMAGE_SIZE,
+        height=IMAGE_SIZE,
         seed=1234,
         outdir=workdir,
     )
@@ -155,14 +156,25 @@ def main() -> int:
         if img.size != (IMAGE_SIZE, IMAGE_SIZE):
             failures.append(f"wrong size: {img.size}")
 
+    # Every aspect must stay a legal VAE size and hold the pixel count steady.
+    square = dimensions(512, "square")
+    for aspect in ASPECTS:
+        w, h = dimensions(512, aspect)
+        if w % 8 or h % 8:
+            failures.append(f"{aspect} is not a multiple of 8: {w}x{h}")
+        if abs(w * h - square[0] * square[1]) / (square[0] * square[1]) > 0.02:
+            failures.append(f"{aspect} changes the pixel count: {w}x{h}")
+    if dimensions(512, "portrait")[0] >= dimensions(512, "portrait")[1]:
+        failures.append("portrait is not taller than it is wide")
+
     # Same seed must reproduce the same bytes; a different seed must not.
     repeat = generate(
         pipe, "a lighthouse in a storm", preset=PRESETS["sd-turbo"],
-        size=IMAGE_SIZE, seed=1234, outdir=workdir,
+        width=IMAGE_SIZE, height=IMAGE_SIZE, seed=1234, outdir=workdir,
     )
     other = generate(
         pipe, "a lighthouse in a storm", preset=PRESETS["sd-turbo"],
-        size=IMAGE_SIZE, seed=99, outdir=workdir,
+        width=IMAGE_SIZE, height=IMAGE_SIZE, seed=99, outdir=workdir,
     )
     if repeat.path.read_bytes() != first.path.read_bytes():
         failures.append("same seed did not reproduce the image")

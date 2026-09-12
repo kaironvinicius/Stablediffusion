@@ -43,7 +43,10 @@ generate.py PROMPT
   -n, --negative   what to avoid (turbo models ignore this, see below)
   -s, --steps      denoising steps
   -g, --guidance   classifier-free guidance scale
-      --size       square output size in pixels
+  -a, --aspect     square, portrait, landscape, tall or wide
+      --size       pixels per side before the aspect is applied
+      --width      exact width, overrides --aspect and --size
+      --height     exact height, overrides --aspect and --size
       --seed       reproduce an earlier image
       --count      generate several images from one model load
   -o, --outdir     where to write the PNGs (default: outputs/)
@@ -69,6 +72,23 @@ Use `sd15` or `sdxl` when negative prompts matter.
 Anything that is not a preset name is treated as a custom model, and the
 defaults fall back to conventional settings rather than turbo ones. Pass
 `--steps` and `--guidance` explicitly if your checkpoint wants something else.
+
+## Orientation
+
+`--aspect` holds the pixel count constant, so changing orientation costs no
+extra time. At the default 768:
+
+| Aspect | Size |
+| --- | --- |
+| `square` | 768x768 |
+| `portrait` | 664x888 |
+| `landscape` | 888x664 |
+| `tall` | 624x944 |
+| `wide` | 944x624 |
+
+Diffusion models are trained on square images and drift at extreme ratios, so
+these stay mild. For anything else, pass `--width` and `--height` directly;
+both must be multiples of 8, which the VAE requires.
 
 ## Performance
 
