@@ -74,23 +74,40 @@ defaults fall back to conventional settings rather than turbo ones. Pass
 
 Measured on 4 vCPU with no GPU, 512px:
 
-| Preset | Time per image |
+| Run | Time |
 | --- | --- |
-| `sd-turbo`, 2 steps | tens of seconds |
-| `sd15`, 25 steps | several minutes |
+| `sd-turbo`, 2 steps, cold cache | 23.5s |
+| `sd-turbo`, 2 steps, warm cache | 14.9s |
 
-Model loading dominates a single run. Use `--count` to amortise it across
-several images.
+Loading the model accounts for most of a single run, so `--count` is much
+cheaper per image than calling the script repeatedly. A conventional preset
+such as `sd15` at 25 steps takes minutes per image on the same hardware.
 
 ## Network requirements
 
-Weights come from `huggingface.co` and its CDN. In a sandboxed environment
-whose egress policy blocks those hosts, `generate.py` fails with a message
-telling you so. Two ways around it:
+Weights come from `huggingface.co`, but the files themselves are served from
+separate CDN and content-addressed-storage hosts. Allowing only the main domain
+leaves downloads hanging partway through. Behind a domain allowlist, all four
+entries are needed:
 
-- Allow `huggingface.co` and `cdn-lfs.huggingface.co` in the network policy.
-- Download a checkpoint on another machine and pass the file directly:
-  `generate.py "a prompt" --model /path/to/model.safetensors`
+```text
+huggingface.co
+*.huggingface.co
+*.hf.co
+*.xethub.hf.co
+```
+
+`*.hf.co` covers the CDN, which resolves to names such as `us.aws.cdn.hf.co`.
+`*.xethub.hf.co` covers Xet storage at `cas-server.xethub.hf.co`, which the
+hub uses by default for large files. `HF_HUB_DISABLE_XET=1` forces the older
+CDN path, but that host needs allowing too, so it is not a way around the list.
+
+Where the policy cannot be changed, download a checkpoint elsewhere and pass
+the file directly:
+
+```bash
+generate.py "a prompt" --model /path/to/model.safetensors
+```
 
 ## Offline smoke test
 
